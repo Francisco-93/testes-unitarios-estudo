@@ -35,6 +35,10 @@ class CustomerServiceImplTest {
     public static final String EMAIL    = "francisco@ibm.com";
     public static final String PASSWORD = "123";
 
+    private Customer customer;
+    private CustomerDTO customerDTO;
+    private Optional<Customer> optionalCustomer;
+
     @InjectMocks //Injeta o objeto real aqui
     private CustomerServiceImpl service;
 
@@ -43,10 +47,6 @@ class CustomerServiceImplTest {
 
     @Mock
     private ModelMapper mapper;
-
-    private Customer customer;
-    private CustomerDTO customerDTO;
-    private Optional<Customer> optionalCustomer;
 
     @BeforeEach
     void setUp() {
