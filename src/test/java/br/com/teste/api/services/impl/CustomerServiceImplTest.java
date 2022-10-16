@@ -2,21 +2,29 @@ package br.com.teste.api.services.impl;
 
 import br.com.teste.api.domain.Customer;
 import br.com.teste.api.domain.dto.CustomerDTO;
+import br.com.teste.api.exceptions.DataIntegrityViolationException;
 import br.com.teste.api.exceptions.ObjectNotFoundException;
 import br.com.teste.api.repositories.CustomerRepository;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class CustomerServiceImplTest {
@@ -86,15 +94,75 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void create() {
+    void whenCreateThenReturnSuccess() {
+        when(repository.save(any())).thenReturn(customer);
+
+        Customer response = service.create(customerDTO);
+
+        assertNotNull(response);
+        assertEquals(Customer.class, response.getClass());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(EMAIL, response.getEmail());
+        assertEquals(PASSWORD, response.getPassword());
     }
 
     @Test
-    void update() {
+    void whenCreateThenReturnADataIntegrityViolationException() {
+        when(repository.findByEmail(anyString())).thenReturn(optionalCustomer);
+        optionalCustomer.get().setId(2);
+        try{
+            service.create(customerDTO);
+        }catch (Exception ex){
+            assertEquals(DataIntegrityViolationException.class, ex.getClass());
+            assertEquals("E-mail já cadastrado no sistema", ex.getMessage());
+        }
     }
 
     @Test
-    void delete() {
+    void whenUpdateThenReturnSuccess() {
+        when(repository.save(any())).thenReturn(customer);
+
+        Customer response = service.update(customerDTO);
+
+        assertNotNull(response);
+        assertEquals(Customer.class, response.getClass());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(EMAIL, response.getEmail());
+        assertEquals(PASSWORD, response.getPassword());
+    }
+
+    @Test
+    void whenUpdateThenReturnADataIntegrityViolationException() {
+        when(repository.findByEmail(anyString())).thenReturn(optionalCustomer);
+        optionalCustomer.get().setId(2);
+        try{
+            service.update(customerDTO);
+        }catch (Exception ex){
+            assertEquals(DataIntegrityViolationException.class, ex.getClass());
+            assertEquals("E-mail já cadastrado no sistema", ex.getMessage());
+        }
+    }
+
+    @Test
+    void deleteWithSucess() {
+        when(repository.findById(anyInt())).thenReturn(optionalCustomer);
+        doNothing().when(repository).deleteById(anyInt());
+        service.delete(ID);
+        verify(repository, times(1)).deleteById(anyInt());
+    }
+
+    @Test
+    void deleteWithObjectNotFoundException() {
+        when(repository.findById(any())).thenThrow(new ObjectNotFoundException("Objeto não encontrado"));
+
+        try{
+            service.delete(ID);
+        }catch (Exception ex){
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals("Objeto não encontrado", ex.getMessage());
+        }
     }
 
     private void startCustomer(){

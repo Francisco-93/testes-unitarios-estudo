@@ -2,7 +2,6 @@ package br.com.teste.api.config;
 
 import br.com.teste.api.domain.Customer;
 import br.com.teste.api.repositories.CustomerRepository;
-import br.com.teste.api.services.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
